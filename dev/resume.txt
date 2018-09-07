@@ -1,0 +1,51 @@
+********************************************************************************
+                                  Khalid Diriye
+kdiriye18@gmail.com                                                 507-210-7776
+
+Bachelor's of Science in Computer Information Technology, Security+
+********************************************************************************
+
+   Technical Skills: Python, Unix/Linux, Bash, C#, Windows (XP/7/8/10), Linux (Ubuntu/Kali), and Mac OS (El Capitan/Sierra)
+   Web & Design    : HTML/CSS, PHP/MySQL, Adobe Photoshop, Sony Vegas Pro 15
+
+
+***************
+Work Experience
+***************
+   ___________________________________________________________________________
+   Minnesota State University, Mankato
+   Lead Information Security Analyst
+      - Managed a group of 5 security analyst for daily incident response task.
+	  - Created documentation layout for security analysts.
+	  - Worked directly with the Chief Information Security Officer ensure policies and procedures met best standards. (NIST 800-53)
+   ___________________________________________________________________________
+   Minnesota State University, Mankato
+   Information Security Analyst
+      - Developed security awareness program.
+	  - Routinely vulnerability scans of all information technology assets.
+	  - Monitor network logs and follow DMCA, SOC, and/or Phishing procedures.
+   ___________________________________________________________________________
+   Riverland Community College
+   Technical Support Specialist
+      - Troubleshooting PCs or Macs and providing customer service.
+
+**********************************
+Competitions and Personal Projects
+**********************************
+
+    Excel Forms Compare
+
+    Google Dorking 
+
+    OptiTera - Tera Optimizer 
+
+    Billing and Human Resources System
+
+*********
+Education
+*********
+
+   Minnesota State University, Mankato (MNSU)
+      - Bachelor of Science in Computer Information Technology 
+	  - CompTIA - Security+ Cert
+	  - MNSU - Network Technologies Cert

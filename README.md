@@ -1,2 +1,0 @@
-# emrulyousof.github.io
-
