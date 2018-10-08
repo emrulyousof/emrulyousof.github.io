@@ -1,0 +1,186 @@
+Set Up a High Availability Deployment:
+https://docs.appdynamics.com/display/PRO45/Set+Up+a+High+Availability+Deployment
+https://docs.appdynamics.com/display/PRO45/Manage+a+High+Availability+Deployment
+
+Controller (metric ingester) https://docs.appdynamics.com/display/PRO44/Controller+System+Requirements
+ 
+Events Service (elastic search/analytics): https://docs.appdynamics.com/display/PRO44/Events+Service+Requirements
+ 
+EUM(end user monitoring): https://docs.appdynamics.com/display/PRO44/EUM+Server+Requirements
+
+
+Copy ssh key from platform to all the hosts
+Add all private-IPs to /etc/hosts files of all the hosts
+
+
+vi /etc/hosts
+
+10.0.0.12      loadbalancer
+10.0.0.3       controller-a
+10.0.0.7       controller-b
+10.0.0.8       es1         
+10.0.0.5       es2
+10.0.0.14      es3
+10.0.0.13	   eum
+
+3. Edit /etc/nsswitch.conf to change DNS route and add “files” in front of the dns
+
+#hosts:     db files nisplus nis dns
+hosts:      files dns
+
+4. Install Enterprise Controller
+5. Add hosts to Enterprise Console
+6. Add Credentials to Enterprise Console
+7. Install Controller
+8. Install Event Service
+
+9. Configure the load balancer
+ Setup Nginx reverse proxy for the controller
+Yum install nginx (install in the Load Balancer)
+
+10. Change directory to /etc/nginx/conf.d - appdynamics.conf
+
+vi appdynamics.conf 
+upstream controllers {
+	server 10.0.0.7:8090 fail_timeout=5s max_fails=3;
+	server 10.0.0.10:8090 backup;
+}
+
+server {
+	listen 80;
+	server_name _;
+	location / {
+		proxy_pass http://controllers;
+	}
+}
+
+
+11. sudo nginx -t 
+
+12. sudo service nginx restart                            
+
+13. Create eventservice.conf
+upstream events-service-api { 
+	server 10.0.0.3:9080; 
+	server 10.0.0.4:9080; 
+	server 10.0.0.6:9080; 
+	keepalive 15;
+ } 
+server { 
+	listen 9080; 
+	location / { 
+		proxy_pass http://events-service-api; 
+		proxy_http_version 1.1; 
+		proxy_set_header Connection "Keep-Alive"; 
+		proxy_set_header Proxy-Connection "Keep-Alive";
+	 } 
+}
+
+14. sudo service nginx restart  
+
+
+Update Controller Settings Scenario In order for the Controller to use the Events Service, the Controller settings must include the URL to connect to the Events Service. 
+High level instructions 
+
+1. Log into Controller Admin (admin.jsp) 
+
+2. Update value for 
+appdynamics.on.premise.event.service.url 
+
+3. Get the values for the following: 
+appdynamics.es.eum.key 
+appdynamics.on.premise.event.service.key 
+
+4. Update the values in to these values. 
+
+Step-by-Step instructions
+ 
+1. Log out of the Controller. 
+
+2. In a browser window, navigate to 
+[NGINX FQDN HOST]:8090/controller/admin.jsp and log in with password changeme. 
+
+3. Click on the Controller Settings menu option to open that page. 
+
+4. Use the Search Filter (top right) to filter the list of settings by using the word url. 
+
+5. Locate the setting appdynamics.on.premise.event.service.url and update its value to http://[NGINX INTERNAL IP]:9080 
+
+6. Click the Save button. 
+
+7. Remove the word url from the Search Filter. Now locate the following and put it your handover document 
+appdynamics.es.eum.key 
+appdynamics.on.premise.event.service.key 
+
+8. Log into each of the Events Service machines and go to: /opt/appdynamics/ThePlatform/events-service/processor/conf/ 
+
+9. Using vi change the file events-service-api-store.properties (vi events-service-api-store.properties) 
+so that: ad.accountmanager.key.eum = [appdynamics.es.eum.key] 9 ad.accountmanager.key.controller = [appdynamics.on.premise.event.service.key]
+
+11.So each of the ES machines has the data from the controller machine Restart events service and test 
+
+12.From Nginx host Go to the platform admin directory. (platform-admin).
+ 
+13. Run ./bin/platform-admin.sh restart-events-service 
+
+14.Test by running the following command from the Events Service machine 
+curl http://[Nginx Internal IP]:9080/_ping 
+which should return a response of _pong.
+
+
+
+EUM Processor installation
+------------------------------------------------------------------------------
+#Prerequisite: 
+	- Controller Installed
+	- Events Service installed
+
+1. ssh into the Enterprise Console & EUM machine (ssh -i <path-to-pem-key>/4_4_enablement centos@<EUM-hostname>)
+
+
+2. Change the permissions for the installer: chmod 775 euem-64bit-linux-4.4.x.x.sh
+
+
+3. Run the installer: ./euem-64bit-linux-4.4.x.x.sh
+	- Pick the production EUM
+	- Use admin for all of the passwords for ease of use
+
+
+4. After installation, provision the license found in the /home/centos directory
+	- cd $EUM_HOME/eum-processor
+	- ./bin/provision-license.sh <PATH_TO_EUM_LICENSE>
+
+
+5. Configure the events service properties in the eum.properties (Events Service must be running)
+	- cd $EUM_HOME/eum-processor
+	- vi bin/eum.properties and change the following properties
+		a. analytics.enabled=true
+		b. analytics.serverHost=<hostname>, where <hostname> is the host where the event service is running
+		c. analytics.accountAccessKey=<eum_key>, where <eum_key> is the Events Service key that appears as the appdynamics.es.eum.key value in the Administration Console
+	- After updating the eum.properties file, restart the EUM Server.
+		a. $EUM_HOME/eum-processor/bin/eum.sh stop
+		b. $EUM_HOME/eum-processor/bin/eum.sh start
+
+
+6. Connect the EUM Server with the AppDynamics Controller
+	- Log in the the Controllers Administration Console (http://<controller-hostname>:<8090>/controller/admin.jsp)
+	- Set the following Controller properties
+		a. eum.cloud.host: http://eum-host-name:7001 – This tells you where the controller will poll for EUM metrics.
+		b. eum.beacon.host: http://eum-host-name:7001 – This tells you where the JavaScript Agent will be configured to send out the beacons over the HTTP protocol.
+		c. eum.beacon.https.host: https://eum-host-name:7002 – This tells you where JavaScript Agent will be configured to send out the beacons over the HTTPS protocol.
+		d. eum.mobile.screenshot.host: http://eum-host-name:7001 – This tells you where the Controller will look for mobile screenshots.
+
+
+7. Check if the EUM service is running
+	- Go to this URL: http(s)://<EUM-Hostname>:7001/v2/ping
+	- Navigate to the Controller GUI and click on User Experience
+
+------------------------------------------------------------------------------
+
+
+./platform-admin.sh remove-dead-hosts --hosts 192.168.121.124 --platform-name apptest
+# Show hosts 
+./platform-admin.sh list-hosts --platform-name apptest
+# Login 
+./platform-admin.sh login --user-name admin
+
