@@ -1,0 +1,987 @@
+/**C:\opscode\chefdk\embedded\lib\ruby\gems\2.3.0\gems\chef-dk-1.3.43\lib\chef-dk\skeletons
+*$export EDITOR=$(which vim)
+####This iis to set up WBA proxy 
+*$export http_proxy="http://corppac.walgreens.com:8080"
+*$export https_proxy="http://corppac.walgreens.com:8080"
+*comment
+* plink -ssh wagsadmin@pln-awuchef01.walgreens.com
+*When the system boots, typically one process called the init process starts up the /sbin/init that in turn manages child processes 
+*Memory leak: when the coding of a program request memory from the kernel and then fails to return that memory when it finished using it
+*
+*
+*$command FLAGS/OPTIONS/SUBCOMMANDS/ARGUMENTS  # Basic structure of commands
+*command: "what to do?"; options: "How to do it?"; arguments" "What to do with it"
+*
+*#Flags start with a single dash and are followed by a single letter. For example, if you want to view the contents of a directory in long format you can use ls -l. 
+*#The longer form starts with two dashes and is then followed by an entire word. For example, "chef --help" Flags are almost always optional and can be specified in any order
+*
+*#Options are like flags but require a value to follow them. An example is the user name or password you provide when you bootstrap a Chef node with the knife command, 
+*#"knife bootstrap ipaddress --user USERNAME --ssh-password PASSWORD" Options are almost always optional and can be specified in any order
+*
+*#Some commands require additional commands, called subcommands, that refine the focus of the original command. One example is "git status" which uses the git command and the status 
+*#subcommand to ask for status. Commands may require multiple subcommands to increasingly refine their scope. These subcommands must be provided in a specific order
+*
+*#Some commands may allow for optional arguments or require them to be specified. An example is the ls command. When a valid path is provided as an argument, such as ls ~, 
+*#the files within that directory are displayed. These arguments are often required and must be provided in a specific order
+*
+*Linux command parameters can be divided into two types: Parameters with a "-" are called options AND Parameters with no leading dash are called arguments
+*
+*
+*The yum command line utility is a package management program for those linux distributions that uses the RPM packages
+*The basics of run level
+*0-halt (do not set initdefault to this); 1-Single user mode; 2-Multiuser, without NFS(The same as 3, if you do not have networking); 3-Full multiuser mode
+*4-unused or admin; 5-The default run level if you have a graphical user interface on your Centos server; 6-reboot(do not set initdefault to this)
+*Editing the /etc/inittab to change default runlevel (id:5:initdefault:<br />
+*The Mount directory is where you typically going to store your directories that you want to use as mount points for your filesystems 
+*
+*/
+
+***************All about the MAN Command************************************'
+##The MAN page has 9 sections: 1)Executable programs and shell commands 2)System calls provided by the kernel 3)Library calls provided by the program library 
+##4)Device file (usually stored in /dev) 5)File formats 6)Games 7)Miscelaaneous(macro packages, conventions, and so on) 8)System administration commands (req root previleges)
+##9)kernel routines
+##You can switch between the section by simple passing the section  number like so: 
+$man 5 <cmdName>
+$whatis <cmdNAme>
+###MAN pages are organized like so: Name; Synopsis; Description; Options; Files; See Also; Bugs; History; Author
+$man -k <cmdName>  #searches for anything that has the cmdName mentioned in the documentation 
+$apropos <cmdName>  #searches for and displays cmdName mentioned in the documentation 
+$info info   #The new manpage
+$rpm -ql yum | grep README
+$find /usr/share/doc -name "*passwd*"
+$locate <cmdName>
+$whereis <cmdName>
+
+
+###Utilities to read different file formats:
+#File extensions .1-.9 - man, info, less 
+#File extensions .gz or .bx2 - use gunzip, bunzip2 to extract the files first then read with; less
+#File extensions .txt - less and any text edit vi, vim
+#FIle extension .html or .htm - any web browser
+#File extension .odt - Libre office, OpenOffice.org, any word processor app 
+#File extension .pdf - xpdf, AdobeReader 
+#File extension .tif, .png, .jpg - Gimp
+
+
+**************Installing Packages and Package Managers**********************
+/**
+*Packages actually rely on other programs in order to install the software. Binary packages are packages that have an executable built from source
+*
+*
+*/
+#yum commands
+$ls -la /etc/yum.repos.d/  #yum restores repositories and online repositories list from which we downloads package names 
+$yum search <packageName>   # Search for string
+$yum info <package_name>    # Display info
+$yum install -y <package_name>   # The -y option answers yes to all the prompt
+$yum remove <package_name> 
+$yum update  #update the source lists of the packages 
+$yum upgrade
+$yum check-update <packageName>  #To check if a package needs update 
+$yum deplist <packageName>  #To check what dependencies required for a specific package
+$yum clean packages  #Removes junks left behind from uninstalled packages
+$yum clean all  #To remove anything from a temp file or packages already uninstalled
+
+#RPM commands
+$rpm -q <packageName>   #query a package
+$rpm -qi <packageName>  #i=detail information about the package 
+$rpm -qa   # Lists all the installed packages
+$rpm -qR <packageName>   #To check for required dependent packagees. R=Required
+$rpm -qf </path/to/file>   # Will will link the file to the package it belongs to 
+$rpm -ql <package_name>    # Will list all the files that belongs to that particular package
+$rpm -ivh <package_file.rpm>   # to i=install a package, v=verbose, h=hash shows progress
+$rpm -Uvh  #The -U option uninstalls any previous versions installed and installs the new version clean install 
+$rpm -e <package_name>     #to erase or uninstall a package 
+$rpmdb --rebuilddb   #rebuild rpmdb 
+
+#APT commands for debian
+$vi /etc/apt/sources.list 
+$apt-cache search <string> 
+$apt-get install -y <package_name>
+$apt-get remove package   #removes package leaving configuration 
+$apt-get remove --purge <packageName>
+$apt-get autoremove <packageName>   #The name of the package as an arguement is optional 
+$apt-get upgrade 
+$apt-get dist-upgrade  #upgrade the underlying linux operating system
+$apt-get update  #dpkg does not automatically download and install dependency packages for an application hence it flags the system for the needed update the local cache. Instead 
+$apt-get -f upgrade  #of downloading and installing all the individual packages needed with dpkg the short cut is to do a $apt-get update and then do a fix upgrade like so $apt-get -f upgrade
+$apt-get purge  #removes package deleting configuration
+$apt-cache show <package_name>    # To show information about a particular package
+
+#DPKG commands to interact with a package manager debian distributions
+$dpkg -l   #lists installed packages
+$dpkg -s <package_name>  #shows if a package is installed 
+$dpkg --get-selection  #also lists all installed packages
+$dpkg -S </path/to/file>   # Will display a package that the file belongs to
+$dpkg -L <package_name>    # List all the files in a package
+$dpkg -i <package_name.deb>  # Installs a package
+$dpkg --remove <packageName>
+$dpkg --purge <packageName>  #also remove all the configurations file for the package that are no longer needed
+
+#To check or find an installed package
+$which <packageName>
+$where is <packageName>
+
+
+*****************The Linux Filesystem*******************************************
+/**
+*Where the data is stored on a storage device within a certain manner: data is organized and easily located; Data can be saved in a persistent manner; Data integrity is preserved; Data can be quickly retrieved for a user in a later point in time 
+*The linux file system uses a FileSystem Hierarchy Standard (FHS) hierarchy structure to organize data  
+*Linux systems have a standard in which at the root directory has several of the same sub directories in a certain order or fashion 
+*FHS keeps all the linux distributions in line so end user can know where certain types of data is stored within the linux file systems 
+*/dev stores two types of device files: Character oriented device file sends or receive data sequentially one character at a time ex: printer, mice other sorts of peripheral devices
+*the second sort of device stored within the /dev folder is the block oriented device files. These are files that manage data what is known as blocks ex: actual hard drive, usb, etc. Block devices supports random access to data stored on them  
+*Physical hardware on any linux system is addressed by application and services running on the system through actual files that live in the /dev folder
+*/etc folder contains text based configuration files used by the system as well as services running in the system
+*/etc/aliases  #Contains a table used to redirect all to local users 
+*/etc/exports  #Configured file systems to be exported to remove NFS clients 
+*/etc/fstab    #lists the partitions and file systems that will be automatically mounted when we boot our linux system   
+*/etc/ftpusers #Controls users access to FTP service running on a linux system 
+*/etc/group    #Contains local group definitions 
+*/etc/grub.conf #Contains configuration parameters for the init process 
+*/etc/hosts    #This contains a list of hostname to IP address mappings that we can use to resolve certain hostnames 
+*/etc/inittab  #Contains configuration paramemters for the init process 
+*/etc/init.d   #This is a sub directory that contains startup scripts and services 
+*/etc/rc.d/init.d  #Red Hat or CentOS based systems startup scripts and services 
+*/etc/passwd   #This is our linux systems user accounts file 
+*/etc/resolv.conf  #This is where we specify what DNS server and domain suffix that our system is going to use 
+*/etc/x11      #Has the X windows configuration files 
+*/
+$touch -c  #c option tells touch not to create a new filename if one doesn't already exists 
+$touch -d "February 1 2015" fileName.txt  #To change the full date of the timestamp of the file use the -d option
+$mkdir -m <directoryName>  #Use to set the octo value of the folder 
+$mkdir -p <directoryName>  #Creates the parent folder of the child directory if it does not already exists 
+###Globbibg Searching with wilcards
+$ls *.txt
+$ls ???.txt 
+$ls [a-z]*.txt 
+#On directories, X means that we can cd (change directories) in to it 
+#On files, X means you can execute it 
+$chown username.groupname filename    #To change the ownership of a file we can use the chown command 
+$ln -s <path/to/file> <link_name>     #Creating symbolic link 
+$ln -s /webroot/home/httpd/test.com/index.php /home/vivek/index.php  #For example create a softlink for /webroot/home/httpd/test.com/index.php as /home/vivek/index.php
+$ls -l file1 link1  #To verify new soft link run
+
+
+**************************Standard bash file Descriptor**********************************************************************
+There are three file descriptors 
+stdin(0)  #standard input
+stdout(1) #standard output 
+stderr(2) #standard error 
+
+
+******************************************Logging*********************************************************
+vim /etc/rc.d/rc.local  #This is the config file location where you can create custom log files
+dmesg > /var/log/dmesg  #Adding this line to rc.local config file it will log dmesg log to this filename dmesg after reboot 
+touch /var/lock/subsys/local 
+
+
+
+**********************************************Processes**********************************************************************
+ps -Aef | grep -i bes
+ps u U username 
+ps -u username --forest
+ps -aux | grep
+ps -ax | grep 
+top => h ? k r p m 
+free  #generates a report on the system total memory status 
+free -h 
+
+
+*********************************Tape Archive (TAR)**************************************************************************
+#`tar' saves many files together into a single tape or disk archive, and can restore individual files from the archive
+#A linux utility that archive things. It does not compress or compact files. It sticks all your files together into one file 
+$tar -cf archive.tar foo bar  # Create archive.tar from files foo and bar
+$tar -tvf archive.tar   # List all files in archive.tar verbosely
+$tar -xf archive.tar    # Extract all files from archive.tar
+# -C, --directory=DIR        change to directory DIR
+$sudo tar -xvf apache-tomcat-8*tar.gz -C /opt/tomcat --strip-components=1
+#for the tar command the order of the flags -xvf matters you cannot put f in the begining
+#We can also call on the compression algorithm types when using the tar utility with option flags
+#tar -zcf (gzip)  will produce file.tar.gz or file.tgz in one pass the extensions are synonimous just different naming convention 
+#tar -jcf (bzip2) will produce file.tar.bz2 or file.tb2 in one pass the extensions are synonimous just different naming convention
+$tar -zcf nameoffolder.tgz foldername 
+$tar -zxvf nameoffolder.tar.gz  #to uncompress and unarchive in one pass
+
+tar -zcvf /var/preserve/<dir_name>-$(date +%Y-%m-%d_%H-%M-%S).tar.gz <dir_name_to_backup>  #creating a backup of a directory with timestamp 
+
+###Compression tools: Gzip, Bzip2, Zip
+$gzip nameoffolder.tar   #to compress a file
+$gunzip nameoffolfer.tar.gz  #to uncompress a file
+ 
+###Bzip2 does a better job than Gzip in compressing a file since it has a better algorithm of compressing a file than gzip
+$yum install -y bzip2  #To install bzip2 
+$bzip2 nameoffolder.tar  #to compress a file 
+$bunzip2 nameoffolder.tar.bz2 #to uncompress a file 
+
+###Zip is the only tool that can archive and compress at once most commonly used in the Windows operating system 
+$yum install -y zip  $To install zip 
+$zip <nameofzip.zip> filename.txt   #to compress a file 
+$zip -r nameoffolder.zip foldertozip  #-r stands for recursive which recursively zips all the content of the folder 
+$yum install -y unzip  #To install unzip 
+$unzip <nameofzip.zip> #to uncompress a file 
+$unzip -r nameoffolder.zip  #-r recursively unzip 
+$unzip -l nameoffolder.zip  #list the content of the archive folder 
+
+
+******************************All About Environmental Variables*******************************************************************
+$echo $BASH    #value=/usr/bin/bash 
+$echo $SHELL   #value=/bin/bash
+$echo $CPU     #spec to your system 
+$echo $DISPLAY  #The local video card monitoring
+$echo $ENV      #/etc/bash.bashrc
+$echo $EUID     #The UID of current user 
+$echo $HISTFILE  #~/.bash_history 
+$echo $HISTSIZE  #1000
+$echo $HOME      #current users home directory
+$echo $HOST
+$echo $HOSTNAME  #systems assigned hostname 
+$echo $LOGNAME   #username of current userName
+$echo $MAIL      #/var/spool/mai/username  OR /var/mail/username
+$echo $MANPTH
+$echo $OLDPWD    #Prior current directory 
+$echo $OSTYPE 
+$echo $PATH  #Prints the env variable the $PATH variable value
+$echo $PSI
+$echo $PWD
+$echo $USER
+$echo $USERNAME 
+#PATH=$PATH:/var/opt/   #Appaend a new path to the $PATH variable 
+$export PATH 
+$vim .bash_profile   #To make the PATH variable persistent after reboot and it to .bash_profile 
+$vim /etc/profile    #Global configuration file 
+$env  #Prints all the available enviromantal variables 
+$set  #Prints all the available enviromental variables 
+
+
+#Changing shell
+$echo $SHELL
+$chsh #interactive
+$chsh -s /path/to/shell #Non interactive the -s option sets the value
+
+
+##All about Alias
+$alias invent="cd Desktop;mkdir dir1;touch file1;date;cal"
+$invent #to execute the alias command invent
+$unalias <aliaName> #Deletes an alias 
+$alias #shows all the alias that exists on your system
+##To make an alias persistent add it to the .bashrc file under some more ls alias section in the home dir
+
+#Generating a file content with cat 
+#TO add new text 
+$cat > <filename> <<EOL
+>type
+>here
+>EOL 
+
+#To append text 
+$cat >> <filename> << EOF
+>Enter text
+>here
+>EOF
+ 
+
+************************************Sudoers file***********************************************************
+##Sudoers allows particular users to run various commands as the root user, without needing the root password
+##By default the sudoers file is configured in Centos7 to allow all members all users who are members of the wheel group to use sudo to do anything that root can do
+##Wheel group allows people in group wheel to run all commands
+##Sudoers file could specify individual users can run what software on which machines 
+##(the sudoers file can be shared between multiple systems) but by default centos has is it set up to where you simply just add a user to the wheel group and you're all set
+$sudo visudo #to edit the /etc/sudoers file
+
+$finger  #Shows infromation on user account within the linux filesystem
+$yum install -y finger 
+$pwck   #to verify /etc/passwd and /etc/shadow are in sync 
+$pwconv #adds missing users from /etc/passwd to /etc/shadow
+$w  #The w command shows information about users currently on the machine and their processes 
+$who 
+$who -b   #shows the last boot time of our linux machine 
+$who -m   #gets the hostname and user associated with it 
+$who -r   #shows the current run-level for the user 
+$who -q   #shows the number of users logged into the machine 
+$who -a   #shows all the information at once 
+$last <user>     #to see what the linux user last activity was 
+
+#User IDs
+###To find a user’s UID (user ID) or GID (group ID) and other information in Linux/Unix-like operating systems, use the id command
+#The syntax is: id [options] [UserNameHere]
+$id -u -g -G <userName>   # -u is uid -g is group id -G is associated group id
+$id -nu -ng -nG  <username> #the -n option displays names instead of id numbers 
+##You can show the real ID for the -g, -G and -u options instead of the effective ID by passing the -r option
+$id -r -u <username>  #use the -r option to query the real id instead of the effective id 
+$id -r -u <username>
+
+###Useradd 
+$vi /etc/default/useradd   #The location of default settings of the useradd utility
+$useradd -D   #Prints out the user default configurations 
+#/etc/login.defs  #This file contains default values for /etc/shadow and /etc/default/useradd 
+#/etc/skel  #When we use the useradd command it copies directories and files that live in the skel dir to the newly created user home dir 
+#The passwd utility to change a user's existing password 
+$passwd -S <username>   #Shows the settings of the password for that particular user. Shows when password was last changed 
+$man passwd 
+$usermod -l jsmith -c "Jennifer Smith" janniston   #Change the username and the full name of the current user janniston 
+$userdel jsmith   #to delete a user 
+$userdel -r jsmith  #-r flag deletes the user home folder also 
+$usermod -l <new_username> <old_username>   #to change or modify the user name 
+
+
+###Groups 
+#With groups we can apply permission to the group level and then we can apply those permision to the group and then make all the users need 
+#the same level of access members of that group 
+$/etc/group   #This is the config file 
+$groupadd -g -p -r <group_name>   #to add a new group; g flag specifies the gid; p for password; r for create a system group 
+$groupmod 
+$groupdel 
+
+
+
+#Permissions
+$sudo chmod <octo_value> <fileName>
+$sudo chmod ugo+rwx <fileName>
+$sudo chmod ugo-rwx <fileName>
+#ACL - Access Control List
+$getfacl <fileName> # getfacl <fileName> is going to show a list of permissions for this file
+$man setfacl
+$sudo setfacl -m user:<user_name>:rwx <fileName>
+$sudo setfacl -m user:<user_name>:--- <fileName>
+$lsblk -f  # to view label and UUID
+$blkid   #to view only the UUID 
+$vi /etc/fstab   #make entry in the /etc/fstab to make mount persistent 
+#The structure of data in /etc/fstab => UUID  /mountpoint  filesystem type   defaults 0 0
+#Executing a directory is being able to cd into that directory and able to see its contents 
+
+******************************PARTIONING HARDDRIVE AND CREATING FILESYSTEM AND MOUNTING A DRIVE*****************************************************************
+*$du -sch *
+$df -h # lists the file system size in gigabytes and megabytes
+$sudo fdisk -l  #lists all disk all partitions all file systems which are technically available to be mounted but may or may not be mounted currently
+$sudo mount -t <filesystemtype> /dev/device_name(sdb1) <mount_point /mnt/test>  # to mount an available storage
+$sudo parted print all # shows the file system type not shown by the fdisk utility
+$sudo umount </mount point or path/to/device /dev/sdb1> # to unmount a filesystem use the umount command 
+$sudo fdisk /path/to/device </dev/sdb> #m => menue, n => new MBR partition; w => write the changes to disk; d => delete partition; g => GPT partition   
+$sudo mkfs.ext4 /dev/sdb1 # creates a filesystem of ext4 
+
+
+$sudo lshw -C disk #shows all the disks and what type of disks currently associated with the server
+$fdisk -l | less
+$fdisk /dev/sdc
+$mkfs -t ext4 /dev/sdc1
+$sudo mkdir /datadrive
+$mount /dev/sdc1 /datadrive 
+$mount
+$df -h
+$blkid #to find out the uuid of the disk
+$umount /datadrive(mountpoint) #to unmount
+$mount /datadrive (mountpoint) #to mount
+$chmod go+w /datadrive #giving write permission for group and other to the directory
+$touch test.file #to create a file test.file
+$sudo passwd root #setting password for the root account
+https://help.1and1.com/servers-c37684/dedicated-server-linux-c37687/administration-c37694/increase-the-size-of-the-logical-volume-a756168.html
+
+**********************Forming a RAID array***********************************
+$sudo mdadm --create /dev/md0 --level=1 --raid-devices=2 /dev/sdb1 /dev/sdc1  # forming a software raid 1 array with mdadm
+$sudo mkfs.ext4 /dev/md0  # This will make a file system on the array itself
+$sudo mdadm --detail /dev/md0  #This is to check the status of the newly formed array
+$sudo blkid   # to find the UUID of the newly formed array md0
+##Make the entry in the /etc/fstab => UUID=dsdklajfkljflkdjfkdflksdfk    /mount/point     filesystem/type     defaults   0 0 
+
+#How to mark a disk as failed in an MDADM RAID array and how to replace that
+$cat /proc/mdstat   # to check degradation on any of the disks 
+$sudo mdadm --detail /dev/md0  #This is to check the status of th enewly formed array
+$sudo mdadm --manage /dev/md0 --fail /dev/sdb1 # this is the command to mark the disc as failed
+$sudo mdadm --manage /dev/md0 --remove /dev/sdb1
+$sudo shutdown -h now
+
+##After the machine is back up and the failed disk has been removed and added a new disk and partioned it only after these steps run the below command
+$sudo mdadm --manage /dev/md0 --add /dev/sdb1    #Add disk back to the RAID array 
+$sudo mdadm --detail /dev/md0 
+$cat /proc/mdstat  #to check degradation on any of the disks
+
+##Destroying an array 
+$sudo umount /dev/md0   # first unmount the array 
+$sudo mdadm --stop /dev/md0  # to stop the array 
+$sudo mdadm --remove /dev/md0  # make sure to stop the array before attempting to remove it
+$sudo mdadm --zero-superblock /dev/sdb1
+$sudo mdadm --zero-superblock /dev/sdc1 
+
+##Remove the array entry from the /etc/fstab 
+$sudo shutdown -h now 
+
+##To verify the status that the array has been removed 
+$sudo mdadm --detail /dev/md0 
+$df -h 
+$sudo mount -t ext4 /dev/md0 /mnt/test   # this will fail since the array does not exist
+
+
+*****************************SAMBA Fileshare SMB*************************************
+$rpm -qi samba  #check to see if the package is already installed
+$yum search samba
+$yum deplist samba
+$yum install samba   #to install th package 
+$service smb status or $systemctl status smb   #to check the status of the service smb
+#To enable and start smb service
+$systemctl enable smb
+$systemctl start smb
+$systemctl status smb 
+$sudo service nmb status or $systemctl status nmb 
+$sudo systemctl list-unit-files | grep smb   #To check if a service is enbaled to load at boot
+#To turn on and off services on boot
+$sudo chkconfig <serviceName> off
+$sudo chkconfig <serviceName> on 
+#Make a smaba dir at the root dir
+$cd /
+$mkdir samba
+$ls -la | grep smaba 
+$ls -la ./samba
+
+#Make a example dir in the smaba dir 
+$cd ./samba
+$mkdir example 
+
+#Open up the samba configuration file in the /etc/samba dir
+$vi /etc/samba/smb.conf 
+#In the smb.conf file enter the following
+[example]
+         path = /samba/example
+		 browseable = yes
+		 writeable = yes
+		 guest ok = yes 
+#Configure firewall to allow service samba
+$firewall-cmd --permanent --zone=public --add-servce=samba 
+$firewall-cmd --reload  #Reloads the firewall
+#Set the permission for the directories recursively 
+$chmod -R 755 /samba/example 
+#Make sure selinux allows samba to share
+$sudo chcon -R -t samba_share_t /samba/example 
+#Add a samba user  
+$sudo smbpasswd -a cody 
+
+
+######################Install and configure NFS server and client###############################################################
+#Install the packages and start the service. Server configuration  
+$yum install -y nfs-utils nfs-utils-lib
+$chkconfig nfs on   #for older version of centos 
+$systemctl enable nfs 
+$systemctl start nfs && systemctl status nfs 
+#For example share the /home and /var/share dir 
+$mkdir /var/share 
+$chmod 755 /var/share 
+#configure the /etc/exports file 
+$vim /etc/exports
+/<dir_to_mount>  192.168.1.0/24(rw,no_root_squash)   #disable root squash 
+/var/share   <ipaddress>/<cidr>(ro) 
+$exportfs -a   #exports the filesystem from the exports file 
+#Restart the nfs service 
+$systemctl restart nfs 
+
+#Client system configuration 
+$yum install -y nfs-utils nfs-utils-lib
+#Create some mount points 
+$cd /mnt 
+$mkdir nfs_home
+$mkdir nfs_share 
+$mount <server_ip>:/home /mnt/nfs_home/
+$mount 192.168.i.131:<dir_to_mount> /mnt/nfs_share/
+#to mount on boot and make it persistent configure the /etc/fstab file 
+<server_ip>:<dir_to_mount>    /mnt/nfs_home  nfs  rw,sync,hard,intr 0 0
+192.168.1.131:/var/share      /<mount_point>  <fs_type>  rw,sync,hard,intr 0 0
+$df -h
+$umount nfs_home/
+$umount nfs_share/ 
+$df -h  
+$mount -a   #mounts anything remote and local filesystem types from within the /etc/fstab 
+$umount /mnt/nfs_home
+$mount /mnt/nfs_home
+  
+###############################Install and configure nginx webserver###########################################################
+$apt-get update
+$apt-get install nginx
+$serivce nginx start   #Start the nginx service
+#Then open a brower and paste the url or ipaddress and you will see Welcome to NGINX to verify the installation 
+#Server Blocks virtual hosts configuration 
+$mkdir -p /home/www/domain1.com/public_html
+$vi /home/www/domain1.com/public_html/index.html 
+#Put some sample code in the index.html file 
+<html>
+<center>HELLO! This is a test page!<br>
+We did everything right!</center>
+</html>
+#Configure NGINX sites configuration file
+$cd /etc/nginx/sites-available
+$ls -la
+#A default configuration file will show up we need to copy the content of it into domain1.com config file 
+$cp /etc/nginx/sites-available/default /etc/nginx/sites-available/domain1.com 
+$vi /etc/nginx/sites-available/domain1.com
+#Uncomment the listen 80 line 
+#root /home/www/domain1.com/public_html;
+#index index.php index.html index.htm;
+##Make site accesible from http://localhost/
+#server_name <ipaddress> 
+#Next step is to enable the site
+$cd /etc/nginx/sites-enabled
+$ls -la
+#default site will show up delete that and create a symbolic link to domain1.com in sites-available
+$rm /etc/nginx/sites-available/default 
+#ln -s <path_to_source_file> <path_to_symbolic_link_file>
+$ln -s /etc/nginx/sites-available/domain1.com /etc/nginx/sites-enabled/domain1.com 
+#Restart Nginx service
+$service nginx restart  
+#Then open a brower and paste the url or ipaddress and you will see Welcome to NGINX to verify the installation
+
+########################Install and Configure Mysql Database#######################################################
+$apt-get install mysql-server
+$sudo mysql_secure_installation 
+
+#The main configuration file for mysql is called my.cnf located at /etc/mysql/my.cnf or /etc/my.cnf 
+
+
+#####################################Install and Configure Kubernetes Cluster*******************************************************
+#prerequisites
+#First install ntp on all of the servers in the cluster. NTP service will help us to be accurate as possible in time reporting across the cluster 
+$yum install -y ntp 
+#Enable and start the ntpd service because etcd is going to rely on ntp to keep us in time sync
+$systemctl enable ntpd && systemctl start ntpd && systemctl status ntpd 
+#We need to do name resolution. Setup DNS in prodution for now just make entry of ipaddress and hostname to /etc/hosts  
+$vim /etc/hosts
+ipaddress hostname
+ipaddress hostname
+ipaddress hostname
+ipaddress hostname
+#ping the servers with hostname to test 
+#turn off firewalld for now or configure kubernetese ports to allow through firewalld
+#Create a repository file for the latest version of docker kubernetese and etcd on the system 
+$vim /etc/yum.repos.d/virt7-docker-common-release.repo #Copy and paste the content below in the file 
+[virt7-docker-common-release]
+name=virt7-docker-common-release
+baseurl=http://cbs.centos.org/repos/virt7-docker-common-release/x86_64/os/
+gpgcheck=0   #turning off gpgcheck 
+$yum update 
+#Enable the repository for this particular install. Because we want to pull the docker kubernetes and etcd versions that are avialble from this particular repository rather then the defaults
+$yum install --enablerepo=virt7-docker-common-release etcd kubernetes docker   #Install all the dependencies on all the servers both from a node master and client utility perspective
+
+#Configuring the kubernetes master server
+$cd /etc/kubernetes 
+$ls -la
+$vim config 
+#Change the following in the /etc/kubernetes/config file as shown below 
+#How the controller-manager, scheduler, and proxy find the apiserver 
+KUBE_MASTER="--master=http://<fqdn>:8080"
+KUBE_ETCD_SERVERS="--etcd-servers=http://<fqdn>:2379"
+#Setup ETCD
+$cd /etc/etcd 
+$ls -la
+$vim etcd.conf 
+#Change the followings in this file 
+ETCD_LISTEN_CLIENT_URLS="http://0.0.0.0:2379"
+ETCD_ADVERTISE_CLIENT_URLS="http://0.0.0.0:2379" 
+#Edit the apiserver 
+$cd /etc/kubernetes 
+$ls -la 
+$vim apiserver 
+#Change the followings in this configuration file 
+#The address on the local server to listen to 
+KUBE_API_ADDRESS="--address=0.0.0.0"
+#The port on the local server to listen on    #uncomment this setting below
+KUBE_API_PORT="--port=8080"
+#Port minions listen on   #uncomment this setting below 
+KUBELET_PORT="--kubelet-port=10250"
+#default admission control policies   #comment this line out
+#KUBE_ADMISSION_CONTROL 
+#Ensure that the below 4 services are enabled in that order 
+$systemctl enable etcd kube-apiserver kube-controller-manager kube-scheduler
+#Start the services. The services in the master controller needs to be started first before the minions
+$systemctl start etcd kube-apiserver kube-controller-manager kube-scheduler
+#Check the status of the services to make sure that they are running
+$systemctl status etcd kube-apiserver kube-controller-manager kube-scheduler | grep "(running)" | wc -l
+
+#Install and configure the Minions 
+$vim /etc/kubernetes/config  #change the followings
+#How the controller-manager, scheduler, and proxy find the apiserver 
+KUBE_MASTER="--master=http://<master-fqdn>:8080"
+KUBE_ETCD_SERVERS="--etcd-servers=http://<master-fqdn>:2379"
+$vim /etc/kubernetes/kubelet  #change the followings
+#The address for the info server to serve on (set to 0.0.0.0 or "" for all interfaces)
+KUBELET_ADDRESS="--address=0.0.0.0"
+#The port for the info server to serve on  #uncomment the below line 
+KUBELET_PORT="--port=10250" 
+#You may leave this blank to use the actual hostname 
+KUBELET_HOSTNAME="--hostname-override=<fqdn>"
+#Location of the api-server 
+KUBELET_API_SERVER="--api-servers=http://<master-fqdn>:8080"
+#pod infrastructure container   #comment out the below line 
+#KUBELET_POD_INFRA_CONTAINER="
+#Ensure that the below 3 services are enabled in that order 
+$systemctl enable kube-proxy kubelet docker 
+#Start the services 
+$systemctl start kube-proxy kubelet docker 
+#Check the status of the services 
+$systemctl status kube-proxy kubelet docker | grep "(running)" | wc -l 
+#On the minions make sure that docker is running properly 
+$docker images 
+$docker --version 
+$docker pull hello-world 
+$docker images 
+$docker run hello-world 
+$docker ps 
+$docker ps -a 
+
+#kubectl Exploring our Environment 
+$man kubectl 
+$kubectl get nodes  #returns a list of nodes that registered themselves to the master server 
+$kubectl describe nodes 
+$kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}'
+$kubectl get nodes -o jsonpath='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]} {@.type}={@.status};{end}{end}' | tr ';' "\n" | grep "Ready=True"
+$kubectl get pods 
+$kubectl describe pod <name_of_pod>
+$kubectl create -f <path_to_yaml>
+$kubectl run busybox --image=busybox --restart=Never --tty -i --generator=run-pod/v1
+$kubectl run busybox --generator=run-pod/v1 --image=busybox --restart=Never --tty -i 
+$kubectl run wordpress --image=tutum/wordpress --port=80 --hostport=81
+$kubectl delete pod <pod_name>
+$kubectl port-forward <pod_name> :80 &  #Dynamically assigns a port in the locathost to the remote pods port 80 
+$kubectl get pods -l <key=value>
+$kubectl describe pods <key=value>
+$kubectl describe deployments -l <key=value> 
+$kubectl apply -f <path_to_yaml> 
+$kubectl get deployments 
+$kubectl get replicationcontrollers 
+$kubectl run <name_of_deployment> --image=latest123/apache --replicas=2 --labels=app=myapache,version=1.0  #Creating deployment and pods from the command line 
+$kubectl exec <pod_name> <command>  #executing a coomand from within a pod using kubectl exec command 
+$kubectl exec <pod_name> -c <container_id> <command>   #executing a command from within a pod within a container using kubectl exec command
+$kubectl exec <pod_name> -i -t -- /bin/bash    #attach to a container using kubectl command 
+$kubectl logs <pod_name>   #pull logs from a running pod with a single container 
+$kubectl logs --tail=1 <pod_name> 
+$kubectl logs --since-24h <pod_name>
+$kubectl logs -f <pod_name>
+$kubectl logs -f -c <containe_id/container_name> <pod_name>
+$kubectl autoscale <kind> <kind_name> --min=2 --max=6 --cpu-percent=  #autoscaling with kubectl 
+$kubectl scale --current-replicas=2 --replicas=4 <kind>/<kind_name>
+
+**************************************************************************************************************************************
+
+#Centos7 network and firewall configuration
+firewall-cmd --permanent --zone=public --add-service=http
+firewall-cmd --reload
+firewall-cmd --permanent --zone=public --add-port=80/tcp
+systemctl status firewalld
+systemctl start firewalld
+systemctl stop firewalld
+systemctl enable firewalld
+systemctl disable firewalld
+
+##############The magic of SED*****************************************************************************************************
+$sed -i '<line#>,<line#> d' <fileName>  # Deletes the line numbers from the file 
+$sed -i '/PATTERN/ d' <fileName>    #Deletes the pattern from the file 
+$sed -i '/PATTERN/ !d' <fileName>    #Deletes everything else not matching the pattern from the file
+
+
+###Shutting down and rebooting the system 
+$reboot #immediately shutdown the processes running in the background
+$sudo shutdown -r +10 && sudo shutdown -r now || sudo shutdown -r +0; sudo shutdown -r <+time/in/min>
+$sudo shutdown +60; sudo shutdown -h now
+$sudo shutdown -h +15 "The server is going down for maintenance in 15 mins. Please finish your work now."
+$sudo shutdown -c #cancel the shutdown operation
+$telinit 0; telinit 1; telinit 2; telinit 3; telinit 4; telinit 5; telinit 6 #to change the system run level
+$who -r #in order to find the current runlevel
+
+#The History 
+$history #show all the command you executed on the system
+$!<command_number> #executes the command by typing in the corresponding number to the command displayed by the history command output
+$history <10 || any number> #Displays the give number of commands previously executed. 
+$vi ~/.bash_history #can manipulate the history file 
+$mv .bash_history bash_history #making the history file visible from hidden by removing the dot preceeding the filename
+$history -c #This will clear your history
+$export HISTFILESIZE=9999    #Change the history file size 
+$echo $HISTFILESIZE    #Shows the history file size 
+
+##Opening a pdf file 
+$xdg-open <path/to/pdfFilename>
+
+
+*************************************REGEX************************************************************************
+*  #Matches any character any number of occurence 
+.  #Any single character 
+?  #Matches zero or one of the proceeding characters 
+^  #Matches expression if it appears at the begining 
+$  #Matches expression if it appears at the end 
+[nnn]  #Matches any one character between the braces 
+[^nnn] #Matches any expression that doesn't contain any one of the characters specified between the braces  
+[n-n]  #Matches any single character 
+[1-10] #Any character between 1 and 1 or 0 
+[ser]  #Matching s, and then e, and then r
+
+
+
+*******************************##################################
+***************Mastering the CommandLine*************************
+*******************************##################################
+$halt  #Will shutdown the linujx operating system only root user can do this
+$reboot  
+$init 0  #shutdown
+$init 6   #reboot 
+$shutdown --help 
+$exit  #terminate the current running session 
+$su username
+$su -   #will become the root user 
+$env   #shows enviroment variables on current user 
+$top 
+$clear 
+$whoami  #shows what user is logged in 
+$netstat   #Shows the status of the network
+$route     #To view routing table 
+$ifconfig 
+$ip addr   #Shows ipaddresses and MAC addresses 
+$uname   #Shows what kind of operating system we are using 
+$uname -s  #Displays the linux kernel name 
+$uname -n  #Displays the systems hostname 
+$uname -r  #Displays the linux kernel release number 
+$uname -v  #Displays the linux kernel version number
+$uname -m  #Displays the hardware architecture  
+$uname -p  #Displays the processor type 
+$uname -i  #Displays the hardware platform 
+$uname -o  #Displays the operating system 
+$uname -a  #Displays all the informations at once 
+
+###In Linux file name and directories are case sensitive
+$cd   #moves to the home folder 
+$cd / #root directory
+$cd ~ #home directory
+$cd - #takes you back to the last accessed directory
+$cd .. #changes to the parent directory of the current directory
+$ls   #showing you what is in that directory
+$ls -p  #Appends a / after the name of folders in a dir
+$ls -latrR
+$ls -R  #R=Recursive option to display a dir content recursively 
+$less #to page the content of a file or standard output
+$mkdir
+$rmdir
+$touch #to create a empty file or to update the timestamp of a file
+$rm -r 
+$rm
+$cat #&& ; \
+$sudo #gives you super user previleges
+$cat dmesg | less
+$cat dmesg | grep VGA #the grep command search for only the keyword and prints it out
+$grep <keyword> /path/to/file
+$grep -i <keywordsearchstring> /path/to/file  #the -i option ignores case sensitivity 
+$grep -in <keywordsearchstring> /path/to/file  #the -n opton prints the line numbers where the result is found
+$grep 'wag_ilmt_redhat_isolate\|wag_ilmt_suse_isolate'  #To grep multiple values use '\|' within single quote 
+$sort fileName.txt  #sorts text in a file alphabetically 
+$sort -r fileName.txt  #sorts text in a file in the reverse alphabetical order 
+$sort -n fileName.txt   #the -n option sorts numeric value in a file 
+$cut -c2-4 fileName.txt  #cuts the content of the file by the column number
+$cut -c2,4 fileName.txt  #cuts the content of column 2 and 4 only 
+$cut -d" " -f2-4 fileName.txt 
+$wc -w fileName.txt    #counts the number of words in a file 
+$wc -c fileName.txt    #counts the number of characters in a file  
+$mv <filename> </where/to/path> #like cut in windows moves the file into new location and removes the original
+mv -t /destination/directory/ file1 file2 file3  #If you want to move or copy all of the files to the same directory, you can use the -t option of mv, type/supply each filename as an argument, as many files as arguments as you like
+$cp <filename> </where/to/path> #make a copy of the file i.e. keeps the original
+$cp -R <dirname> </where/to/path>
+$cp /home/usr/dir/{file1,file2,file3,file4} /home/usr/destination/ #to copy multiple files at once
+$cp /path/to/{dir1,dir2,dir3,dir4} /path/to/destination #to copy multiple directories at once
+$cp -t /destination/directory/ file1 file2 file3 or <dir1 dir2 dir3>  #If you want to move or copy all of the files to the same directory, you can use the -t option of cp, type/supply each filename as an argument, as many files as arguments as you like
+$rsync -avzP <dirname> </where/to/path> #enables you to see the progress and speed of transfer. a=>archive; v=>verbose; z=>compress; P=>progress
+$wget <url> -P <path/to/folder> #-P option specifies the path to download the file 
+$wget -i <path/to/url_link_file.txt> -P <path/to/destination/folder> #the -i option reads the input url from a text file
+$groups cody #Shows all the groups the specified user is member of
+$man <command> #brings up the manual for thatparticular command 
+$date
+$sudo date MMddhhmmyyyy.ss #modify the date timestamp
+$sudo usermod -a -G <groupName> <userName> #appends a group to a particular user group membership
+$sudo yum search <packagename>
+$sudo dhclient #assigns an ipaddress
+$sudo dhclient -r #releases an ipaddress
+$getfacl <filename>
+$sudo setfacl -m user:sarah:rwx null
+$find .  #finds everything in the current directory 
+$find . -type d  #only going to return things that are directory within the current directory
+$find . -type f  #only going to return things that are file within the current directory 
+$find . -name "file.*"
+$find / -perm /4000 -ls
+$find / -perm +4000 -ls #older version
+$sudo chgrp <groupName> <fileName>
+$sudo chown user.user -R .
+$chown [options] new_owner object(s)  #The basic syntax for using chown to change owners is 
+$chown alice file1 dir1  #For example, the following would transfer the ownership of a file named file1 and a directory named dir1 to a new owner named alice
+$chown bob:group2 file2  #Thus, for example, the following would change the owner of a file named file2 to the user with the user name bob and change its group to group2
+$ getent passwd <username>  #fetch the info from LDAP servers make sure to login to LDAP enabled server
+
+
+
+
+
+
+#Copying a directory from one linux machine to another linux machine via ssh
+scp -r <directory> <username>@<targethost>:<targetdir>
+scp <option(-v)> <file_name> <user_name>@<ip_address>:<path_to_file>
+
+#The simplest solution for password-less git access would be to use the git remote set-url command 
+#and set an SSH url for the existing repo.
+git remote set-url origin git@github.com:name/repo.git
+
+
+###SSH
+
+
+
+#Connecting to a remote cloud instance via ssh private and public key
+$ssh-keygen  #Simply to create a private and public key pair 
+$ssh-keygen -t rsa -b 2048 -f ~/.ssh/azure
+$ssh -i ~/.ssh/azure <user_name>@<ip_address>
+$ssh-copy-id username@<hostname/ipaddress>  #to copy public key to the remote server account 
+
+
+
+
+
+
+**************************Virtualization QEMU-KVM***************************************************
+/**
+*Virtualization is really taking something that is actual and virtualizing it. There are different kinds of virtualizations: Hardware virtualization, Partial virtualization and Para Virtualization
+*Full Virtulaization: Complete simulation of the actual hardware to allow software, which typically consists of a guest machine or virtual machine. KVM uses full virtualization
+*Para-virtualizatio: The hardware env is not simulated Advantage its faster then Full virtualization. Disadvantage The guest operating system i actually gonna require special device drivers
+*VMM/Hypervisor is a piece of software that is responsible for monitoring and controlling virtual machines or guest operating system : Type 1 Hypervisor; the hypervisor runs 
+*directly on top of the hardware : Type 2 Hypervisor; the hypervisor acts as a seperate layer often on top of a base Operating System. Type 2 hypervisor are also known as hosted hypervisor 
+*Type 2 Hypervisor are dependent on the host operating system for every operations that takes place. The main advantage of type 2 hypervisor is the wide range of hardware support
+*because the uderlying host operating system is controlling all of the hardware access. The KVM Hypervisor supports over commiting of system resources 
+*Overcommitting is to allocate more virtualized CPUs or virtual memory than the available resources on the host system provides 
+*Thin Provisioning allows you to optimize available storage space for the guest virtual machines. Similar to over committing but only pertains to storage not CPU and memory  
+*
+*
+*
+*/
+
+#Installing Packer on Centos 7.3
+$sudo yum update -y
+$sudo wget https://releases.hashicorp.com/packer/1.0.2/packer_1.0.2_linux_amd64.zip?_ga=2.200136806.997903006.1498856840-1304292629.1498856840
+$mkdir /usr/local/packer_7.5
+$cp packer_0.7.5_linux_amd64.zip /usr/local/packer_1.0.2
+$sudo unzip packer_0.8.6_linux_amd64.zip
+$export PATH="/usr/local/packer_1.0.2:$PATH"
+#Add the export command into ~/.bash_profile to ensure this path change persists after reboots
+$cat ~/.bash_profile
+$export PATH="/usr/local/packer_1.0.2:$PATH"
+
+
+#Checking systems configuration for virtualization requirements
+$cat /proc/cpuinfo
+$grep --color -Ew 'svm|vmx\1m' /proc/cpuinfo 
+$lscpu
+$free -m  #to check memory status
+
+#Installing the virtualization packages
+$yum groupinfo virtualization
+$yum group install virtualization 
+$yum install qemu-kvm libvirtd virt-install virt-manager -y
+
+#Make sure that the libvirtd service is statred. THe libvirtd service when started wil exposed the API that allows to interact with qemu-kvm binary 
+$Systemctl status libvirtd 
+
+#TO validate that the libvirt hypervisor drivers can be run using the KVM virtualization
+$virt-host-validate 
+$virsh nodeinfo
+$virsh domcapabilities
+
+###Polkit allows to create rules example: Allowing users that belong to wheel group access to virtual machine manager 
+$vi /etc/polkit-1/rules.d/50-default.rules 
+
+
+***************************Adding system wide logging of all commands from all users***************************************************
+#For BASH shells, edit the system-wide BASH runtime config file: /etc/bashrc (for centos and linux)
+$ vi /etc/bashrc
+#Append to the end of the file /etc/bashrc
+export PROMPT_COMMAND='RETRN_VAL=$?;logger -p local6.debug "$(whoami) [$$]: $(history 1 | sed "s/^[ ]*[0-9]\+[ ]*//" ) [$RETRN_VAL]"'
+#Set up logging for "local6" with a new file:
+$ cd /etc/rsyslog.d/
+$ ls -la
+$ touch bash.conf
+#And the contents to bash.conf 
+local6.*    /var/log/commands.log
+#Restart rsyslog:
+$ systemctl status rsyslog 
+$ systemctl restart rsyslog 
+$ systemctl status rsyslog 
+#Now Rotate the log:
+$ cd /etc/logrotate.d/
+$ ls -la
+#Add the new bash-commands log file in that list: in the syslog file (for centos and redhat) and save 
+$ vi ./syslog
+/var/log/commands.log
+Next log out and log back in
+
+
+
+##############TROUBLE_SHOOTING###########################################
+#ERROR: 
+#E: Could not get lock /var/lib/dpkg/lock - open (11 Resource temporarily unavailable)
+#E: Unable to lock the administration directory (/var/lib/dpkg/) is another process using it
+$ps aux | grep apt   # will catch processes containing the word apt, at least. If you see an apt-get process or an aptitude process that looks stuck, you can try
+$kill processnumber
+#and if that doesn't work try
+$kill -9 processnumber    #This should kill the process and may remove the lock. 
+
+/**
+*Killing an apt or aptitude process is harmless unless it is actually in the middle of package installation. In any case, if the process got stuck, 
+*you probably don't have a choice but to kill it.
+*Killing a dpkg process directly, if present, is not a good idea, because if dpkg is active, it is probably manipulating the package database, 
+*and killing it may leave the package database in an inconsistent state; i.e. corrupted.
+*Killing an apt-get or aptitude process is in general much safer.
+*/
+
+#ERROR: Bridged adapter not connecting to network | Cannot find device "eth0" | Failed to bring up eth0
+#The above error was solved by using the command:
+$sudo rm -rf /etc/udev/rules.d/70-persistent-net.rules   # The command will remove network persistence rules
+$sudo reboot
+/**
+*auto enp0s3||<interface_name> 
+*example: auto eth0
+*iface enp0s3 ||<interface_name> inet dhcp || static
+*example: iface eth0 inet dhcp
+*/
+
+###Virtualbox guest edition doesnt Install. Remedy in order to install the guest edition in virtualbox which will give enhanced virtual hardware 
+###capabilities we need first need to make sure or install the kernel header
+$yum install kernel-devel
+$yum install gcc*  
+
+
+#rpmdb: Lock table is out of available locks
+
+kubernetes api server won't start 
+openssl genrsa -out /tmp/serviceaccount.key 2048
+ 
+vim /etc/kubernetes/apiserver:
+KUBE_API_ARGS="--service_account_key_file=/tmp/serviceaccount.key"
+ 
+vim /etc/kubernetes/controller-manager
+KUBE_CONTROLLER_MANAGER_ARGS="--service_account_private_key_file=/tmp/serviceaccount.key"
+systemctl restart kube-controller-manager.service
+
+#####################Debian Target Packages (main/binary-amd64/Packages) is configured multiple times AND GPG error######################
+$lsb_release -a  #Gives details about the OS version 
+$sudo apt-get autoclean
+$sudo rm /etc/apt/sources.list
+https://debgen.xyz/  #got to this link to regenerate the sources.list
+$cd /etc/apt
+$vim sources.list   #Then paste the content from https://debgen.xyz/ to sources.list 
+$apt-get update
+
+*****************************************************Networking**********************************************************************
+/etc/resolv.conf   #(FILE) this is where our DNS server information is stored 
+$route  #the route command is always going to show the default location that our PC is always going to use to get to the outside network. Shows the route table 
+#Adding a route to the route table via the route command
+$route add -net <ipaddress> netmask <255.255.255.0> gw <10.10.30.1> 
+#Deleting a route from the route table via the route command 
+$route del -net <ipaddress> netmask <255.255.255.0> gw <10.10.30.1>
+#Add default gateway or router for our network to out linux machine 
+$route add default gw <10.10.30.1/address>
+$ping 
+$nestat      
+$netstat -a  # Lists all listening and non listening sockets in our linux machine 
+$nestat -i   #Displays stats of our network interfaces  
+$netstat -l  #Lists just the listening sockets
+$netstat -s  #Displays a summary for each protocols
+$netstat -r  #Displays the routing table 
+$traceroute <destination_hostname or ip address>  #Traces the route a packet actually takes or traverses through routers to arrive at its destination  
+$dig www.linuxacademy.com 
+$nslookup <short_name>
